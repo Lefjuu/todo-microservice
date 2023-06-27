@@ -4,7 +4,10 @@ import com.todo.taskservice.model.Task;
 import com.todo.taskservice.model.TaskRequest;
 import com.todo.taskservice.model.TaskResponse;
 import com.todo.taskservice.repository.TaskRepository;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -50,5 +53,11 @@ public class TaskService {
                 .isImportant(task.isImportant())
                 .createdAt(task.getCreatedAt())
                 .build();
+    }
+
+    public ResponseEntity deleteAllTaskByListId(Integer listId) {
+
+        taskRepository.deleteAllByListId( listId);
+        return new ResponseEntity("All Task with list id: " + listId + " deleted", HttpStatus.OK);
     }
 }

@@ -23,6 +23,7 @@
         <module>list-service</module>
         <module>task-service</module>
         <module>eureka-server</module>
+        <module>api-gateway</module>
     </modules>
 
     <properties>

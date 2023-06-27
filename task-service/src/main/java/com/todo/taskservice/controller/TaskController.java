@@ -4,6 +4,7 @@ import com.todo.taskservice.model.TaskRequest;
 import com.todo.taskservice.model.TaskResponse;
 import com.todo.taskservice.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,5 +24,10 @@ public class TaskController {
     @GetMapping("/list/{listId}")
     public List<TaskResponse> getAllTasksByListId(@PathVariable Integer listId) {
         return taskService.getAllTaskByListId(listId);
+    }
+
+    @DeleteMapping("/list/{listId}")
+    public ResponseEntity deleteAllTasksByListId(@PathVariable Integer listId) {
+        return taskService.deleteAllTaskByListId(listId);
     }
 }

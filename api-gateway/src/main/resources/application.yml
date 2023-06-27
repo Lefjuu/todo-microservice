@@ -1,0 +1,79 @@
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        cloud:
+#          gateway:
+#            route:
+#              RouteDefinitionLocator: INFO
+#            nodeValue: TRACE
+#    root: INFO
+#spring:
+#  cloud:
+#    gateway:
+#      routes[0]:
+#        id: list-service
+#        predicates[0]: Path=/api/v1/list
+#        uri: lb://list-service
+#      routes[1]:
+#        id: task-service
+#        predicates[0]: Path=/api/v1/task
+#        uri: lb://task-service
+#      routes[2]:
+#        id: eureka-server
+#        predicates[0]: Path=/eureka/web
+#        filters[0]: SetPath=/
+#      routes[3]:
+#        id: eureka-server-static
+#        predicates[0]: Path=/eureka/**
+#        uri: http://localhost:8761
+#  application:
+#    name: api-gateway
+##  security:
+##    oauth2:
+##      resourceserver:
+##        jwt:
+##          issuer-uri: http://localhost:8181/realms/spring-boot-microservices
+#app:
+#  eureka-server: localhost
+#management:
+#  zipkin:
+#    tracing:
+#      endpoint: http://localhost:9411/api/v2/spans
+#  tracing:
+#    sampling:
+#      probability: '1.0'
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: task-service
+          uri: http://TASK-SERVICE
+          predicates:
+            - Path=/api/v1/task/**
+          filters:
+            - AuthenticationFilter
+        - id: list-service
+          uri: http://LIST-SERVICE
+          predicates:
+            - Path=/api/v1/list/**
+          filters:
+            - AuthenticationFilter
+#        - id: auth-service
+#          uri: http://AUTH-SERVICE
+#          predicates:
+#            - Path=/api/v1/auth/**
+
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone : http://localhost:8761/eureka/

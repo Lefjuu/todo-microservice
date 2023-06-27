@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: task
+    name: task-service
   datasource:
     username: user
     password: password
