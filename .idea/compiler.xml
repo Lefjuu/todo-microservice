@@ -10,6 +10,7 @@
         <module name="api-gateway" />
         <module name="list-service" />
         <module name="task-service" />
+        <module name="auth-service" />
         <module name="eureka-server" />
       </profile>
     </annotationProcessing>
@@ -17,6 +18,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
+      <module name="auth-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="list-service" options="-parameters" />
       <module name="task-service" options="-parameters" />

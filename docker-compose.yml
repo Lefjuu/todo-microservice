@@ -13,6 +13,19 @@ services:
     networks:
       - postgres
     restart: unless-stopped
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - dbdata6:/data/db
+    networks:
+      - mongo
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -45,9 +58,12 @@ services:
 networks:
   postgres:
     driver: bridge
+  mongo:
+    driver: bridge
   spring:
     driver: bridge
 
 volumes:
   postgres:
   pgadmin:
+  dbdata6:

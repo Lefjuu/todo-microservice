@@ -1,0 +1,14 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: auth-service
+  data:
+    mongodb:
+      database: auth-service
+      uri: mongodb://localhost:27017/todo
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
