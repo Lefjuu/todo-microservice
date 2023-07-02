@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: list-service
+#  zipkin:
+#    base-url: http://localhost:9411/
   datasource:
     username: user
     password: password

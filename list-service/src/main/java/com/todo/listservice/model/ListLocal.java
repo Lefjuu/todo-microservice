@@ -24,6 +24,7 @@ public class ListLocal {
             generator = "list_id_sequence"
     )
     private Integer id;
+    private String name;
     private String userId;
     private Integer[] task;
 }

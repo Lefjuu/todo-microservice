@@ -16,9 +16,10 @@ public class ListService {
     @Autowired
     private ListRepository listRepository;
 
-    public ListResponse createList(ListRequest request) {
+    public ListResponse createList(String userId, ListRequest request) {
         ListLocal list = ListLocal.builder()
-                .userId(request.getUserId())
+                .userId(userId)
+                .name(request.getName())
                 .build();
 
         listRepository.saveAndFlush(list);

@@ -76,9 +76,11 @@ public class AuthService {
 //                    }
 //                    throw new UserNotVerifiedException(resend);
 
-                    return jwtService.generateJWT(user);
                 }
             }
+            System.out.println(loginBody.getPassword());
+            System.out.println(user.getPassword());
+            return jwtService.generateJWT(user);
         }
         return null;
     }

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ListResponse {
     private Integer id;
+    private String name;
     private String userId;
     private Integer[] task;
 }

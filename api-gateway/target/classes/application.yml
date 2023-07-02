@@ -51,6 +51,13 @@
 spring:
   application:
     name: api-gateway
+#  main:
+#    web-application-type: reactive
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/jwt_security
+#  zipkin:
+#    base-url: http://localhost:9411/
   cloud:
     gateway:
       routes:
@@ -58,20 +65,33 @@ spring:
           uri: http://TASK-SERVICE
           predicates:
             - Path=/api/v1/task/**
-          filters:
-            - AuthenticationFilter
+#          filters:
+#            - AuthenticationFilter
         - id: list-service
           uri: http://LIST-SERVICE
           predicates:
             - Path=/api/v1/list/**
-          filters:
-            - AuthenticationFilter
+#          filters:
+#            - AuthenticationFilter
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/api/v1/auth/**
 
+
 eureka:
   client:
     service-url:
       defaultZone : http://localhost:8761/eureka/
+
+
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
+
+#security.enable-csrf: false
