@@ -7,11 +7,14 @@ import com.todo.apigateway.token.Token;
 import jakarta.persistence.Column;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import static com.todo.apigateway.user.Role.EMPLOYEE;
 
 @Data
 @Builder
@@ -22,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 public class User implements UserDetails {
 
+
   @Column(name = "id", nullable = false)
   @Id
   private String id;
@@ -29,13 +33,15 @@ public class User implements UserDetails {
   private String firstname;
   @Column(name = "last_name", nullable = false)
   private String lastname;
+  @Indexed(unique = true)
   @Column(name = "email", nullable = false, unique = true, length = 320)
   private String email;
   @Column(name = "password", nullable = false, length = 1000)
   private String password;
 
+  @Builder.Default
   @Column(name = "role")
-  private Role role;
+  private Role role = EMPLOYEE;
   @DBRef
   private List<Token> tokens;
 

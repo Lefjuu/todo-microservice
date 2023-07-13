@@ -1,16 +1,17 @@
 package com.todo.listservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class ListRequest {
     private String userId;
     private String name;
-//    private Integer[] task;
+    private List<Integer> tasksIds;
 }

@@ -1,6 +1,7 @@
 package com.todo.apigateway.controller;
 
 import com.todo.apigateway.auth.AuthenticationService;
+import com.todo.apigateway.exception.InvalidCredentialsException;
 import com.todo.apigateway.model.AuthenticationRequest;
 import com.todo.apigateway.model.AuthenticationResponse;
 import com.todo.apigateway.model.LoginRequest;
@@ -40,7 +41,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             return ResponseEntity.ok(authenticationService.loginUser(loginRequest));
-        } catch (EmailNotFoundException ex) {
+        } catch (EmailNotFoundException | InvalidCredentialsException ex) {
           return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

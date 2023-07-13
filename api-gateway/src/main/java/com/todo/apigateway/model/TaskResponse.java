@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class TaskResponse {
     private Integer id;
     private Integer listId;
+    private String userId;
     private String name;
     private String description;
     private boolean isImportant;

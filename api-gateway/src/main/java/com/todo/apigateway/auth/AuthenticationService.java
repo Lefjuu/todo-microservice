@@ -3,6 +3,7 @@ package com.todo.apigateway.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todo.apigateway.exception.EmailNotFoundException;
 import com.todo.apigateway.config.JwtService;
+import com.todo.apigateway.exception.InvalidCredentialsException;
 import com.todo.apigateway.model.AuthenticationRequest;
 import com.todo.apigateway.model.AuthenticationResponse;
 import com.todo.apigateway.model.LoginRequest;
@@ -11,6 +12,7 @@ import com.todo.apigateway.repository.UserDao;
 import com.todo.apigateway.token.Token;
 import com.todo.apigateway.token.TokenRepository;
 import com.todo.apigateway.token.TokenType;
+import com.todo.apigateway.user.Role;
 import com.todo.apigateway.user.User;
 import com.todo.apigateway.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,7 +49,7 @@ public class AuthenticationService {
         .lastname(request.getLastname())
         .email(request.getEmail())
         .password(passwordEncoder.encode(request.getPassword()))
-        .role(request.getRole())
+        .role(Role.valueOf("EMPLOYEE"))
         .build();
     var savedUser = userRepository.save(user);
     var jwtToken = jwtService.generateToken(user);
@@ -59,7 +61,7 @@ public class AuthenticationService {
         .build();
   }
 
-  public AuthenticationResponse loginUser(LoginRequest loginRequest) throws EmailNotFoundException {
+  public AuthenticationResponse loginUser(LoginRequest loginRequest) throws EmailNotFoundException, InvalidCredentialsException {
     String xd = loginRequest.getEmail();
     log.info(xd);
     Optional<User> opUser = userDao.findByEmailIgnoreCase(loginRequest.getEmail());
@@ -79,9 +81,13 @@ public class AuthenticationService {
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
+      } else {
+        throw new InvalidCredentialsException("Invalid Credentials");
       }
+    } else {
+      throw new EmailNotFoundException("Email not found.");
+
     }
-    throw new EmailNotFoundException();
   }
 
   public AuthenticationResponse authenticate(AuthenticationRequest request) {

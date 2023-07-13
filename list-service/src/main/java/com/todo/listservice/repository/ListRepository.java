@@ -2,6 +2,7 @@ package com.todo.listservice.repository;
 
 import com.todo.listservice.model.ListLocal;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,4 +10,6 @@ import java.util.List;
 @Repository
 public interface ListRepository extends JpaRepository<ListLocal, Integer> {
     List<ListLocal> findByUserId(String userId);
+
+//    ListLocal updateList(ListLocal listPatched);
 }

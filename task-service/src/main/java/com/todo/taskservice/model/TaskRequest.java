@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TaskRequest {
     private Integer listId;
+    private String userId;
     private String name;
     private String description;
     private boolean isImportant;

@@ -41,6 +41,7 @@ public class ListController {
                 .uri("http://list-service/api/v1/list/user",
                         uriBuilder -> uriBuilder.path("/" + jwtAuthenticationFilter.getUser().getId())
                                 .build())
+                .header("userId", jwtAuthenticationFilter.getUser().getId())
                 .retrieve()
                 .bodyToMono(ListResponse[].class)
                 .block();
@@ -65,11 +66,6 @@ public class ListController {
                 .bodyToMono(ListResponse.class)
                 .block();
 
-//        if (listResponseArray != null) {
-//            return listResponseArray;
-//        } else {
-//            throw new IllegalArgumentException("idk, idc");
-//        }
         return listResponse;
     }
 

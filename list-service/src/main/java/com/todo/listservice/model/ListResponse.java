@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -13,5 +15,5 @@ public class ListResponse {
     private Integer id;
     private String name;
     private String userId;
-    private Integer[] task;
+    private List<Integer> taskIds;
 }

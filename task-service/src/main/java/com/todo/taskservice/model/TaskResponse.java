@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TaskResponse {
     private Integer id;
+    private String userId;
     private Integer listId;
     private String name;
     private String description;
