@@ -13,6 +13,8 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
 //    void deleteByListId(Integer listId);
 
+    void deleteAllByIdIn(List<Integer> listIds);
+
     @Transactional
     void deleteAllByListId(Integer listId);
 }

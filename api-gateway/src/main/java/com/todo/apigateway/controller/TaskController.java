@@ -31,6 +31,25 @@ public class TaskController {
 
     private UserDetails userDetails;
 
+    @GetMapping("/{taskId}")
+    @PreAuthorize("hasAuthority('employee:read')")
+    public TaskResponse getTaskById(@PathVariable Integer taskId) {
+        TaskResponse taskResponse = webClientBuilder.build()
+                .get()
+                .uri("http://task-service/api/v1/task/",
+                        uriBuilder -> uriBuilder.path("/" + taskId)
+                                .build())
+                .retrieve()
+                .bodyToMono(TaskResponse.class)
+                .block();
+
+        if (taskResponse != null) {
+            return taskResponse;
+        } else {
+            throw new IllegalArgumentException("idk, idc");
+        }
+    }
+
     @GetMapping("/list/{listId}")
     @PreAuthorize("hasAuthority('employee:read')")
     public TaskResponse[] getTasksByListId(@PathVariable Integer listId) {
@@ -53,10 +72,13 @@ public class TaskController {
     @PostMapping("/list/{listId}")
     @PreAuthorize("hasAuthority('employee:create')")
     public Object createTask(@RequestBody TaskRequest taskRequest, @PathVariable Integer listId) {
+        log.info("checkpoint 1");
         taskRequest.setUserId(jwtAuthenticationFilter.getUser()
                 .getId());
+        log.info("checkpoint 2");
         TaskResponse taskResponse = new TaskResponse();
         log.info(String.valueOf(taskRequest));
+        log.info("checkpoint 3");
         try {
             taskResponse = webClientBuilder.build()
                     .post()
@@ -67,7 +89,7 @@ public class TaskController {
                     .retrieve()
                     .bodyToMono(TaskResponse.class)
                     .block();
-
+            log.info("checkpoint 4 ");
         } catch (WebClientResponseException ex) {
             log.error("Error during task creation: {}", ex.getMessage());
             return ResponseEntity.badRequest()
@@ -90,18 +112,19 @@ public class TaskController {
     @PreAuthorize("hasAuthority('employee:delete')")
     public ResponseEntity deleteTaskById(@PathVariable Integer taskId) {
         try {
-        ResponseEntity response = webClientBuilder.build()
-                .delete()
-                .uri("http://task-service/api/v1/task/{taskId}", taskId)
-                .header("userId", jwtAuthenticationFilter.getUser().getId())
-                .retrieve()
-                .toEntity(String.class) 
-                .block();
+            ResponseEntity response = webClientBuilder.build()
+                    .delete()
+                    .uri("http://task-service/api/v1/task/{taskId}", taskId)
+                    .header("userId", jwtAuthenticationFilter.getUser()
+                            .getId())
+                    .retrieve()
+                    .toEntity(String.class)
+                    .block();
 
-        log.info(String.valueOf(response.getStatusCode()));
-        log.info(String.valueOf(response.getBody()));
-        log.info(String.valueOf(response.getHeaders()));
-        return response;
+            log.info(String.valueOf(response.getStatusCode()));
+            log.info(String.valueOf(response.getBody()));
+            log.info(String.valueOf(response.getHeaders()));
+            return response;
 
         } catch (WebClientResponseException ex) {
             String errorMessage = "Task With id: " + taskId + " not found.";

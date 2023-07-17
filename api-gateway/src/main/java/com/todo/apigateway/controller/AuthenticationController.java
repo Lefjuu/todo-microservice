@@ -7,6 +7,7 @@ import com.todo.apigateway.model.AuthenticationResponse;
 import com.todo.apigateway.model.LoginRequest;
 import com.todo.apigateway.model.RegisterRequest;
 import com.todo.apigateway.exception.EmailNotFoundException;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -57,7 +58,7 @@ public class AuthenticationController {
     public void refreshToken(
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws IOException {
+    ) throws IOException, ServletException {
         authenticationService.refreshToken(request, response);
     }
 }

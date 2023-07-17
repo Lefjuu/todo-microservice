@@ -1,5 +1,6 @@
 package com.todo.listservice.controller;
 
+import com.todo.listservice.exception.ListNotFoundException;
 import com.todo.listservice.model.ListLocal;
 import com.todo.listservice.model.ListRequest;
 import com.todo.listservice.model.ListResponse;
@@ -45,5 +46,11 @@ public class ListController {
         log.info(String.valueOf(listId));
         log.info(String.valueOf(taskId));
         return listService.addTaskToList(listId, taskId);
+    }
+
+    @DeleteMapping("/{listId}/user/{userId}")
+    @Transactional
+    public ResponseEntity deleteListWithTasks(@PathVariable Integer listId,@PathVariable String userId) throws ListNotFoundException {
+        return listService.deleteListWithTasks(listId, userId);
     }
 }

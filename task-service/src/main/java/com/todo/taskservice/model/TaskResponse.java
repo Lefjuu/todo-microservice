@@ -19,6 +19,6 @@ public class TaskResponse {
     private Integer listId;
     private String name;
     private String description;
-    private boolean isImportant;
+    private boolean completed;
     private LocalDateTime createdAt;
 }

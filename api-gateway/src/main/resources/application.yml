@@ -53,11 +53,11 @@ spring:
     name: api-gateway
 #  main:
 #    web-application-type: reactive
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/jwt_security
-#  zipkin:
-#    base-url: http://localhost:9411/
+data:
+  mongodb:
+    uri: mongodb://admin:password@localhost:27017/jwt_security
+  #  zipkin:
+  #    base-url: http://localhost:9411/
   cloud:
     gateway:
       routes:
@@ -65,14 +65,14 @@ spring:
           uri: http://TASK-SERVICE
           predicates:
             - Path=/api/v1/task/**
-#          filters:
-#            - AuthenticationFilter
+        #          filters:
+        #            - AuthenticationFilter
         - id: list-service
           uri: http://LIST-SERVICE
           predicates:
             - Path=/api/v1/list/**
-#          filters:
-#            - AuthenticationFilter
+        #          filters:
+        #            - AuthenticationFilter
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
@@ -82,7 +82,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone : http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 
 

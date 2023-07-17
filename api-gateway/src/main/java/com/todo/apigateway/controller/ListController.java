@@ -7,12 +7,15 @@ import com.todo.apigateway.model.ListResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,9 +42,11 @@ public class ListController {
         ListResponse[] listResponseArray = webClientBuilder.build()
                 .get()
                 .uri("http://list-service/api/v1/list/user",
-                        uriBuilder -> uriBuilder.path("/" + jwtAuthenticationFilter.getUser().getId())
+                        uriBuilder -> uriBuilder.path("/" + jwtAuthenticationFilter.getUser()
+                                        .getId())
                                 .build())
-                .header("userId", jwtAuthenticationFilter.getUser().getId())
+                .header("userId", jwtAuthenticationFilter.getUser()
+                        .getId())
                 .retrieve()
                 .bodyToMono(ListResponse[].class)
                 .block();
@@ -59,7 +64,8 @@ public class ListController {
         ListResponse listResponse = webClientBuilder.build()
                 .post()
                 .uri("http://list-service/api/v1/list/user",
-                        uriBuilder -> uriBuilder.path("/" + jwtAuthenticationFilter.getUser().getId())
+                        uriBuilder -> uriBuilder.path("/" + jwtAuthenticationFilter.getUser()
+                                        .getId())
                                 .build())
                 .body(BodyInserters.fromValue(listRequest))
                 .retrieve()
@@ -67,6 +73,31 @@ public class ListController {
                 .block();
 
         return listResponse;
+    }
+
+    @DeleteMapping("/{listId}")
+    @PreAuthorize("hasAuthority('employee:delete')")
+    public ResponseEntity deleteList(@PathVariable Integer listId) {
+        try {
+            log.info(String.valueOf(listId));
+            ResponseEntity response = webClientBuilder.build()
+                    .delete()
+                    .uri("http://list-service/api/v1/list/" + listId + "/user/" + jwtAuthenticationFilter.getUser()
+                            .getId())
+                    .retrieve()
+                    .bodyToMono(ResponseEntity.class)
+                    .block();
+
+            return response;
+        } catch (WebClientResponseException.NotFound ex) {
+            String errorMessage = "List With id: " + listId + " not found.";
+            log.info(errorMessage);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(errorMessage);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Something went wrong. Please try again later.");
+        }
     }
 
 }

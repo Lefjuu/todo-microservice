@@ -15,6 +15,7 @@ import com.todo.apigateway.token.TokenType;
 import com.todo.apigateway.user.Role;
 import com.todo.apigateway.user.User;
 import com.todo.apigateway.user.UserRepository;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -134,7 +135,7 @@ public class AuthenticationService {
   public void refreshToken(
           HttpServletRequest request,
           HttpServletResponse response
-  ) throws IOException {
+  ) throws IOException, ServletException {
     final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
     final String refreshToken;
     final String userEmail;

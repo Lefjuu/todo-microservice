@@ -1,15 +1,20 @@
 package com.todo.taskservice.controller;
 
 import com.todo.taskservice.exception.ListNotFoundException;
+import com.todo.taskservice.model.Task;
 import com.todo.taskservice.model.TaskRequest;
 import com.todo.taskservice.model.TaskResponse;
 import com.todo.taskservice.service.TaskService;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.Path;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/task")
@@ -18,6 +23,12 @@ public class TaskController {
 
     @Autowired
     private TaskService taskService;
+
+
+    @GetMapping("/{taskId}")
+    public Optional<Task> getTaskById(@PathVariable Integer taskId) {
+        return taskService.getTaskById(taskId);
+    }
 
     @PostMapping("/list/{listId}")
     public TaskResponse createTask(@RequestBody TaskRequest taskRequest, @PathVariable Integer listId) throws ListNotFoundException {
@@ -29,9 +40,11 @@ public class TaskController {
         return taskService.getAllTaskByListId(listId);
     }
 
-    @DeleteMapping("/list/{listId}")
-    public ResponseEntity deleteAllTasksByListId(@PathVariable Integer listId) {
-        return taskService.deleteAllTaskByListId(listId);
+    @PatchMapping("/list/{listId}")
+    @Transactional
+    public ResponseEntity deleteAllTasksById(@RequestBody List<Integer> tasksArray) {
+        log.info("working deleteAllTasksById");
+        return taskService.deleteAllTasksById(tasksArray);
     }
 
     @DeleteMapping("/{taskId}")

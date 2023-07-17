@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.scheduling.config.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,4 +30,5 @@ public class ListLocal {
 //    @CollectionTable(name = "list_task_ids", joinColumns = @JoinColumn(name = "list_id"))
 //    @Column(name = "task_id")
     private List<Integer> taskIds;
+    private LocalDateTime createdAt;
 }

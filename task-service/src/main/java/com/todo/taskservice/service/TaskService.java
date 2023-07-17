@@ -13,8 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,9 +35,6 @@ public class TaskService {
                 .retrieve()
                 .bodyToMono(ListResponse.class)
                 .block();
-        log.info(String.valueOf(listResponse));
-        log.info(listResponse.getUserId());
-        log.info(request.getUserId());
 
         if (listResponse == null || !listResponse.getUserId().equals(request.getUserId())) {
             throw new IllegalArgumentException("List Not Found");
@@ -51,8 +46,9 @@ public class TaskService {
                 .listId(listId)
                 .userId(request.getUserId())
                 .description(request.getDescription())
-                .isImportant(request.isImportant())
+                .completed(request.isCompleted())
                 .createdAt(LocalDateTime.now())
+
                 .build();
         Task newTask = taskRepository.saveAndFlush(task);
 
@@ -70,9 +66,6 @@ public class TaskService {
 //        log.info(Arrays.toString(updatedArray));
 
         log.info("checkpoint 3");
-        log.info(String.valueOf(newTask.getId()));
-        log.info(String.valueOf(newTask.getId()));
-        log.info(String.valueOf(newTask.getId()));
         log.info(String.valueOf(newTask.getId()));
         ListResponse updatedList =  webClientBuilder.build()
                 .patch()
@@ -108,15 +101,15 @@ public class TaskService {
                 .listId(task.getListId())
                 .name(task.getName())
                 .description(task.getDescription())
-                .isImportant(task.isImportant())
+                .completed(task.isCompleted())
                 .createdAt(task.getCreatedAt())
                 .build();
     }
 
-    public ResponseEntity deleteAllTaskByListId(Integer listId) {
+    public ResponseEntity deleteAllTasksById(List<Integer> tasksArray) {
 
-        taskRepository.deleteAllByListId(listId);
-        return new ResponseEntity("All Task with list id: " + listId + " deleted", HttpStatus.OK);
+        taskRepository.deleteAllByIdIn(tasksArray);
+        return new ResponseEntity("All Task with list id: " + tasksArray + " deleted", HttpStatus.OK);
     }
 
     public ResponseEntity deleteTaskById(Integer taskId, String userId) throws WebClientResponseException {
@@ -129,5 +122,9 @@ public class TaskService {
         } else {
             throw new WebClientResponseException(HttpStatus.BAD_GATEWAY.value(), "Task With id: " + taskId + " not found", null, null, null);
         }
+    }
+
+    public Optional<Task> getTaskById(Integer taskId) {
+        return taskRepository.findById(taskId);
     }
 }
