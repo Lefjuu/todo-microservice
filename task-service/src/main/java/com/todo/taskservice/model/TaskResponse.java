@@ -1,9 +1,6 @@
 package com.todo.taskservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 public class TaskResponse {
     private Integer id;
     private String userId;
@@ -21,4 +19,5 @@ public class TaskResponse {
     private String description;
     private boolean completed;
     private LocalDateTime createdAt;
+
 }

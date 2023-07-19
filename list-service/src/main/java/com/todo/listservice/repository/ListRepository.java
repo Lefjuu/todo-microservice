@@ -11,5 +11,5 @@ import java.util.List;
 public interface ListRepository extends JpaRepository<ListLocal, Integer> {
     List<ListLocal> findByUserId(String userId);
 
-//    ListLocal updateList(ListLocal listPatched);
+    List<ListLocal> findByUserIdOrderByCreatedAtDesc(String userId);
 }

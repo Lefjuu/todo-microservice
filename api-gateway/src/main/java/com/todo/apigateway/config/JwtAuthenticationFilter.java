@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -50,7 +49,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        if (request.getServletPath().contains("/api/v1/auth")) {
+        if (request.getServletPath()
+                .contains("/api/v1/auth")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -66,7 +66,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (userEmail != null && SecurityContextHolder.getContext()
+                .getAuthentication() == null) {
             try {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 userId = getUserIdFromUserDetails(userDetails);
@@ -88,26 +89,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext()
                             .setAuthentication(authToken);
                 } else {
-                    // Token is expired or not valid
-                    ResponseEntity<String> errorResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token expired or not valid.");
+                    ResponseEntity<String> errorResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Token expired or not valid.");
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    response.getWriter().write(errorResponse.getBody());
+                    response.getWriter()
+                            .write(errorResponse.getBody());
                     return;
                 }
             } catch (ExpiredJwtException e) {
-                // Token is expired
-                ResponseEntity<String> errorResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token expired.");
+                ResponseEntity<String> errorResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Token expired.");
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.getWriter().write(errorResponse.getBody());
+                response.getWriter()
+                        .write(errorResponse.getBody());
                 return;
             }
         }
-
         filterChain.doFilter(request, response);
     }
 
     public String getUserIdFromUserDetails(UserDetails userDetails) {
         BeanUtils.copyProperties(userDetails, customUserDetails);
-            return customUserDetails.getId();
+        return customUserDetails.getId();
     }
 }

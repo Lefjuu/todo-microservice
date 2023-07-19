@@ -18,39 +18,35 @@ import java.util.Collection;
 @Component
 public class CustomUserDetails implements UserDetails {
 
-     String jwt;
-    @Autowired
-    private UserDetailsService userDetailsService;
     public String id;
     public String username;
     public String password;
+    String jwt;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-     @Override
-     public Collection<? extends GrantedAuthority> getAuthorities() {
-          return null;
-     }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
 
-     @Override
-     public boolean isAccountNonExpired() {
-          return false;
-     }
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
 
-     @Override
-     public boolean isAccountNonLocked() {
-          return false;
-     }
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
 
-     @Override
-     public boolean isCredentialsNonExpired() {
-          return false;
-     }
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
 
-     @Override
-     public boolean isEnabled() {
-          return false;
-     }
-
-//     public getUser() {
-//
-//     }
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }

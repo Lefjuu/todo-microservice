@@ -34,7 +34,6 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody RegisterRequest request
     ) {
-        log.info("hi");
         return ResponseEntity.ok(authenticationService.register(request));
     }
 
@@ -43,7 +42,8 @@ public class AuthenticationController {
         try {
             return ResponseEntity.ok(authenticationService.loginUser(loginRequest));
         } catch (EmailNotFoundException | InvalidCredentialsException ex) {
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .build();
         }
     }
 

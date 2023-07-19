@@ -1,6 +1,7 @@
 package com.todo.taskservice.controller;
 
 import com.todo.taskservice.exception.ListNotFoundException;
+import com.todo.taskservice.exception.TaskNotFoundException;
 import com.todo.taskservice.model.Task;
 import com.todo.taskservice.model.TaskRequest;
 import com.todo.taskservice.model.TaskResponse;
@@ -24,15 +25,14 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-
     @GetMapping("/{taskId}")
     public Optional<Task> getTaskById(@PathVariable Integer taskId) {
         return taskService.getTaskById(taskId);
     }
 
     @PostMapping("/list/{listId}")
-    public TaskResponse createTask(@RequestBody TaskRequest taskRequest, @PathVariable Integer listId) throws ListNotFoundException {
-        return taskService.createTask(taskRequest, listId);
+    public TaskResponse createTask(@RequestBody TaskRequest taskRequest, @PathVariable Integer listId, @RequestHeader String userId) throws ListNotFoundException {
+        return taskService.createTask(taskRequest, listId, userId);
     }
 
     @GetMapping("/list/{listId}")
@@ -43,12 +43,23 @@ public class TaskController {
     @PatchMapping("/list/{listId}")
     @Transactional
     public ResponseEntity deleteAllTasksById(@RequestBody List<Integer> tasksArray) {
-        log.info("working deleteAllTasksById");
         return taskService.deleteAllTasksById(tasksArray);
     }
 
     @DeleteMapping("/{taskId}")
     public ResponseEntity deleteTaskById(@PathVariable Integer taskId, @RequestHeader String userId) {
         return taskService.deleteTaskById(taskId, userId);
+    }
+
+    @PatchMapping("/{taskId}")
+    @Transactional
+    public TaskResponse updateTask(@PathVariable Integer taskId, @RequestBody TaskRequest requestBody, @RequestHeader String userId) throws TaskNotFoundException {
+        return taskService.updateTask(taskId, requestBody, userId);
+    }
+
+    @PatchMapping("/{taskId}/reverse-complete")
+    @Transactional
+    public TaskResponse setTaskReverseComplete(@PathVariable Integer taskId, @RequestHeader String userId) throws TaskNotFoundException {
+        return taskService.setTaskReverseComplete(taskId, userId);
     }
 }

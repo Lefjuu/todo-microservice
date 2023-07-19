@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -26,10 +27,6 @@ public class ListService {
 
     @Autowired
     private ListRepository listRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Autowired
     private WebClient.Builder webClientBuilder;
 
@@ -51,12 +48,19 @@ public class ListService {
     }
 
     public List<ListLocal> getAllUserList(String userId) {
-        List<ListLocal> listLocals = listRepository.findByUserId(userId);
+        List<ListLocal> listLocals = listRepository.findByUserIdOrderByCreatedAtDesc(userId);
         return listLocals;
     }
 
-    public Optional<ListLocal> getListById(Integer listId) {
-        return listRepository.findById(listId);
+    public Optional<ListLocal> getListById(Integer listId, String userId) {
+        Optional<ListLocal> list = listRepository.findById(listId);
+        if (list.isEmpty() || !list.get()
+                .getUserId()
+                .equals(userId)) {
+            throw new WebClientResponseException(HttpStatus.FORBIDDEN.value(), null, null, null, null);
+        }
+
+        return list;
     }
 
     @Transactional
@@ -65,7 +69,7 @@ public class ListService {
             ListLocal list = listRepository.findById(listId)
                     .orElseThrow(ListNotFoundException::new);
             List<Integer> currentTaskIds = list.getTaskIds();
-            currentTaskIds.add(newTaskId);
+            currentTaskIds.add(0, newTaskId);
             list.setTaskIds(currentTaskIds);
             listRepository.save(list);
             return ResponseEntity.ok(list);
@@ -81,12 +85,9 @@ public class ListService {
 
     public ResponseEntity deleteListWithTasks(Integer listId, String userId) throws ListNotFoundException {
         try {
-            log.info(String.valueOf(listId));
             ListLocal list = listRepository.findById(listId)
                     .orElseThrow(ListNotFoundException::new);
 
-            log.info(list.getUserId());
-            log.info(userId);
             if (list == null || !list.getUserId()
                     .equals(userId)) {
                 throw new IllegalArgumentException("List Not Found");
@@ -101,7 +102,6 @@ public class ListService {
                     .block();
 
             listRepository.deleteById(listId);
-            log.info(String.valueOf(deleteTasksResponse));
             return ResponseEntity.ok()
                     .build();
         } catch (ListNotFoundException ex) {
@@ -116,4 +116,20 @@ public class ListService {
                     .body("Internal server error.");
         }
     }
+
+    @Transactional
+    public ResponseEntity deleteTaskIdFromList(Integer listId, Integer taskId) {
+        Optional<ListLocal> optionalList = listRepository.findById(listId);
+
+        if (optionalList.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        ListLocal list = optionalList.get();
+        list.getTaskIds().remove(taskId);
+
+        listRepository.save(list);
+
+        return ResponseEntity.ok().build();
+    }
+
 }

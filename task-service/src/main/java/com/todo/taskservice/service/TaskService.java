@@ -1,6 +1,7 @@
 package com.todo.taskservice.service;
 
 import com.todo.taskservice.exception.ListNotFoundException;
+import com.todo.taskservice.exception.TaskNotFoundException;
 import com.todo.taskservice.model.*;
 import com.todo.taskservice.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -28,18 +29,19 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public TaskResponse createTask(TaskRequest request, Integer listId) throws ListNotFoundException {
+    public TaskResponse createTask(TaskRequest request, Integer listId, String userId) throws ListNotFoundException {
         ListResponse listResponse = webClientBuilder.build()
                 .get()
                 .uri("http://list-service/api/v1/list/{listId}", listId)
+                .header("userId", userId)
                 .retrieve()
                 .bodyToMono(ListResponse.class)
                 .block();
 
-        if (listResponse == null || !listResponse.getUserId().equals(request.getUserId())) {
+        if (listResponse == null || !listResponse.getUserId()
+                .equals(request.getUserId())) {
             throw new IllegalArgumentException("List Not Found");
         }
-        log.info("checkpoint 1");
 
         Task task = Task.builder()
                 .name(request.getName())
@@ -52,22 +54,7 @@ public class TaskService {
                 .build();
         Task newTask = taskRepository.saveAndFlush(task);
 
-        log.info("checkpoint 2");
-
-
-//        Integer[] updatedArray;
-//        if (listResponse.getTask() != null) {
-//            List<Integer> updatedList = new ArrayList<>(Arrays.asList(listResponse.getTask()));
-//            updatedList.add(newTask.getId());
-//            updatedArray = updatedList.toArray(new Integer[0]);
-//        } else {
-//            updatedArray = new Integer[]{newTask.getId()};
-//        }
-//        log.info(Arrays.toString(updatedArray));
-
-        log.info("checkpoint 3");
-        log.info(String.valueOf(newTask.getId()));
-        ListResponse updatedList =  webClientBuilder.build()
+        ListResponse updatedList = webClientBuilder.build()
                 .patch()
                 .uri("http://list-service/api/v1/list/{listId}", listId)
                 .bodyValue(newTask.getId())
@@ -75,14 +62,9 @@ public class TaskService {
                 .bodyToMono(ListResponse.class)
                 .block();
 
-        log.info(String.valueOf(updatedList));
-
-        log.info("checkpoint 4");
-
         TaskResponse taskResponse = new TaskResponse();
         BeanUtils.copyProperties(newTask, taskResponse);
 
-        log.info("checkpoint 5");
         return taskResponse;
     }
 
@@ -118,13 +100,70 @@ public class TaskService {
                 .getUserId()
                 .equals(userId)) {
             taskRepository.deleteById(taskId);
+
+            ResponseEntity deleteTasksResponse = webClientBuilder.build()
+                    .delete()
+                    .uri("http://list-service/api/v1/list/" + taskResponse.get()
+                            .getListId() + "/task/" + taskId)
+                    .retrieve()
+                    .toEntity(Void.class)
+                    .block();
+
             return new ResponseEntity("Task With id: " + taskId + " deleted", HttpStatus.OK);
         } else {
-            throw new WebClientResponseException(HttpStatus.BAD_GATEWAY.value(), "Task With id: " + taskId + " not found", null, null, null);
+            throw new WebClientResponseException(HttpStatus.FORBIDDEN.value(), null, null, null, null);
         }
     }
 
     public Optional<Task> getTaskById(Integer taskId) {
         return taskRepository.findById(taskId);
+    }
+
+    public TaskResponse updateTask(Integer taskId, TaskRequest requestBody, String userId) {
+
+        Optional<Task> currentTask = taskRepository.findById(taskId);
+        if (currentTask.isEmpty() || !currentTask.get()
+                .getUserId()
+                .equals(userId)) {
+            throw new WebClientResponseException(HttpStatus.FORBIDDEN.value(), null, null, null, null);
+        }
+
+        Task taskToUpdate = currentTask.get();
+        taskToUpdate.setName(requestBody.getName());
+        taskToUpdate.setDescription(requestBody.getDescription());
+
+        taskRepository.save(taskToUpdate);
+
+        return convertToTaskResponse(taskToUpdate);
+    }
+
+    private TaskResponse convertToTaskResponse(Task task) {
+        return TaskResponse.builder()
+                .id(task.getId())
+                .userId(task.getUserId())
+                .listId(task.getListId())
+                .name(task.getName())
+                .description(task.getDescription())
+                .completed(task.isCompleted())
+                .createdAt(task.getCreatedAt())
+                .build();
+    }
+
+    public TaskResponse setTaskReverseComplete(Integer taskId, String userId) throws TaskNotFoundException {
+        Optional<Task> currentTask = taskRepository.findById(taskId);
+
+        if (currentTask.isEmpty() || !currentTask.get()
+                .getUserId()
+                .equals(userId)) {
+            throw new WebClientResponseException(HttpStatus.FORBIDDEN.value(), null, null, null, null);
+        }
+
+        Task taskToUpdate = currentTask.get();
+        boolean currentCompletedValue = taskToUpdate.isCompleted();
+        taskToUpdate.setCompleted(!currentCompletedValue);
+
+        taskRepository.save(taskToUpdate);
+
+        return convertToTaskResponse(taskToUpdate);
     }
 }

@@ -27,14 +27,7 @@ public class ListController {
     @Autowired
     private final WebClient.Builder webClientBuilder;
     @Autowired
-    private final UserDetailsService userDetailsService;
-    @Autowired
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
-    private final CustomUserDetails customUserDetails;
-
-    @Autowired
-    private final UserDetails userDetails;
 
     @GetMapping()
     @PreAuthorize("hasAuthority('employee:read')")
@@ -67,6 +60,8 @@ public class ListController {
                         uriBuilder -> uriBuilder.path("/" + jwtAuthenticationFilter.getUser()
                                         .getId())
                                 .build())
+                .header("userId", jwtAuthenticationFilter.getUser()
+                        .getId())
                 .body(BodyInserters.fromValue(listRequest))
                 .retrieve()
                 .bodyToMono(ListResponse.class)
@@ -79,7 +74,6 @@ public class ListController {
     @PreAuthorize("hasAuthority('employee:delete')")
     public ResponseEntity deleteList(@PathVariable Integer listId) {
         try {
-            log.info(String.valueOf(listId));
             ResponseEntity response = webClientBuilder.build()
                     .delete()
                     .uri("http://list-service/api/v1/list/" + listId + "/user/" + jwtAuthenticationFilter.getUser()
@@ -91,7 +85,6 @@ public class ListController {
             return response;
         } catch (WebClientResponseException.NotFound ex) {
             String errorMessage = "List With id: " + listId + " not found.";
-            log.info(errorMessage);
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(errorMessage);
         } catch (Exception ex) {

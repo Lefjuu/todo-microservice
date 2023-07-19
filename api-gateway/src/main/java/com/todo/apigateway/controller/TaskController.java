@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,14 +24,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @Slf4j
 public class TaskController {
 
-//    private final ObservationRegistry observationRegistry;
-
     private final WebClient.Builder webClientBuilder;
-
     @Autowired
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    private UserDetails userDetails;
 
     @GetMapping("/{taskId}")
     @PreAuthorize("hasAuthority('employee:read')")
@@ -72,24 +69,21 @@ public class TaskController {
     @PostMapping("/list/{listId}")
     @PreAuthorize("hasAuthority('employee:create')")
     public Object createTask(@RequestBody TaskRequest taskRequest, @PathVariable Integer listId) {
-        log.info("checkpoint 1");
         taskRequest.setUserId(jwtAuthenticationFilter.getUser()
                 .getId());
-        log.info("checkpoint 2");
         TaskResponse taskResponse = new TaskResponse();
-        log.info(String.valueOf(taskRequest));
-        log.info("checkpoint 3");
         try {
             taskResponse = webClientBuilder.build()
                     .post()
                     .uri("http://task-service/api/v1/task",
                             uriBuilder -> uriBuilder.path("/list/" + listId)
                                     .build())
+                    .header("userId", jwtAuthenticationFilter.getUser()
+                            .getId())
                     .body(BodyInserters.fromValue(taskRequest))
                     .retrieve()
                     .bodyToMono(TaskResponse.class)
                     .block();
-            log.info("checkpoint 4 ");
         } catch (WebClientResponseException ex) {
             log.error("Error during task creation: {}", ex.getMessage());
             return ResponseEntity.badRequest()
@@ -100,12 +94,6 @@ public class TaskController {
                     .body("Internal Server Error");
         }
         return taskResponse;
-    }
-
-    @PutMapping
-    @PreAuthorize("hasAuthority('employee:update')")
-    public String put() {
-        return "PUT:: employee controller";
     }
 
     @DeleteMapping("/{taskId}")
@@ -121,20 +109,76 @@ public class TaskController {
                     .toEntity(String.class)
                     .block();
 
-            log.info(String.valueOf(response.getStatusCode()));
-            log.info(String.valueOf(response.getBody()));
-            log.info(String.valueOf(response.getHeaders()));
             return response;
 
         } catch (WebClientResponseException ex) {
             String errorMessage = "Task With id: " + taskId + " not found.";
-            log.info(errorMessage);
-//            throw ex;
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(errorMessage);
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Something went wrong. Please try again later.");
+        }
+    }
+
+
+    @PatchMapping("/{taskId}")
+    @PreAuthorize("hasAuthority('employee:update')")
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Integer taskId, @RequestBody TaskRequest requestBody) {
+        try {
+            ResponseEntity<TaskResponse> response = webClientBuilder.build()
+                    .patch()
+                    .uri("http://task-service/api/v1/task/{taskId}", taskId)
+                    .header("userId", jwtAuthenticationFilter.getUser()
+                            .getId())
+                    .body(BodyInserters.fromValue(requestBody))
+                    .retrieve()
+                    .onStatus(HttpStatus.NOT_FOUND::equals, clientResponse -> {
+                        String errorMessage = "Task with id: " + taskId + " not found.";
+                        return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage));
+                    })
+                    .toEntity(TaskResponse.class)
+                    .block();
+
+            log.info("Status Code: " + response.getStatusCodeValue());
+            log.info("Response Body: " + response.getBody());
+            log.info("Response Headers: " + response.getHeaders());
+            return response;
+
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        } catch (WebClientResponseException ex) {
+            String errorMessage = "Error while processing the request.";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
+
+    @PatchMapping("/{taskId}/reverse-complete")
+    @PreAuthorize("hasAuthority('employee:update')")
+    public ResponseEntity<TaskResponse> setTaskReverseComplete(@PathVariable Integer taskId) {
+        try {
+            ResponseEntity<TaskResponse> response = webClientBuilder.build()
+                    .patch()
+                    .uri("http://task-service/api/v1/task/{taskId}/reverse-complete", taskId)
+                    .header("userId", jwtAuthenticationFilter.getUser()
+                            .getId())
+                    .retrieve()
+                    .toEntity(TaskResponse.class)
+                    .block();
+
+            return response;
+        } catch (WebClientResponseException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null);
+        } catch (Exception ex) {
+            log.info(String.valueOf(ex));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 }

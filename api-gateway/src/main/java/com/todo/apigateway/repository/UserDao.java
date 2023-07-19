@@ -8,7 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface UserDao extends MongoRepository<User, String> {
-//    Optional<User> findByUsernameIgnoreCase(String username);
 
     Optional<User> findByEmailIgnoreCase(String email);
 

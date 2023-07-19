@@ -25,10 +25,6 @@ public class ListLocal {
 
     private String name;
     private String userId;
-
-//    @ElementCollection
-//    @CollectionTable(name = "list_task_ids", joinColumns = @JoinColumn(name = "list_id"))
-//    @Column(name = "task_id")
     private List<Integer> taskIds;
     private LocalDateTime createdAt;
 }
