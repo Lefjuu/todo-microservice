@@ -24,6 +24,7 @@ public class ListController {
 
     @PostMapping("/user/{userId}")
     public ListResponse createList(@PathVariable String userId, @RequestBody ListRequest listRequest) {
+        log.info(userId, listRequest);
         return listService.createList(userId, listRequest);
     }
 

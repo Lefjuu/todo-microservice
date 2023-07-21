@@ -30,7 +30,7 @@ public class ListController {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @GetMapping()
-    @PreAuthorize("hasAuthority('employee:read')")
+    @PreAuthorize("hasAuthority('employee:create')")
     public ListResponse[] getUserLists() {
         ListResponse[] listResponseArray = webClientBuilder.build()
                 .get()
@@ -52,7 +52,7 @@ public class ListController {
     }
 
     @PostMapping()
-    @PreAuthorize("hasAuthority('employee:write')")
+    @PreAuthorize("hasAuthority('employee:read')")
     public ListResponse createList(@RequestBody ListRequest listRequest) {
         ListResponse listResponse = webClientBuilder.build()
                 .post()

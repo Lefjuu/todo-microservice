@@ -64,7 +64,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+
+        } catch (ServletException ex) {
+            ResponseEntity<String> errorResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Token expired or not valid.");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.getWriter().write(errorResponse.getBody());
+            return;
+        }
 
         if (userEmail != null && SecurityContextHolder.getContext()
                 .getAuthentication() == null) {
@@ -92,8 +101,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     ResponseEntity<String> errorResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                             .body("Token expired or not valid.");
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    response.getWriter()
-                            .write(errorResponse.getBody());
+                    response.getWriter().write(errorResponse.getBody());
                     return;
                 }
             } catch (ExpiredJwtException e) {

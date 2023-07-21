@@ -10,10 +10,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
-public class ListResponse {
+public class ManagementListResponse {
     private Integer id;
     private String name;
     private String userId;
     private List<Integer> taskIds;
+    private List<TaskResponse> tasks;
     private LocalDateTime createdAt;
 }

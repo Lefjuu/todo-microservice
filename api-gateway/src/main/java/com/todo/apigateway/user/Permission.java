@@ -14,7 +14,6 @@ public enum Permission {
     MANAGER_UPDATE("management:update"),
     MANAGER_CREATE("management:create"),
     MANAGER_DELETE("management:delete"),
-
     EMPLOYEE_READ("employee:read"),
     EMPLOYEE_UPDATE("employee:update"),
     EMPLOYEE_CREATE("employee:create"),
